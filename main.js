@@ -3,24 +3,45 @@ const carCtx = carCanvas.getContext('2d');
 const networkCanvas = document.getElementById('networkCanvas');
 const networkCtx = networkCanvas.getContext('2d');
 
+
+
 carCanvas.width = 200;
 networkCanvas.width = 400;
 
+let useBestBrain = false;
+let numberOfCars = 100;
+function useOrDiscardBrain() {
+    let useBestBrain = localStorage.getItem('useBestBrain');
+    if (useBestBrain === null) {
+        localStorage.setItem('useBestBrain', 'true');
+    } else {
+        localStorage.setItem('useBestBrain', useBestBrain === 'true' ? 'false' : 'true');
+    }
+}
+
+const useBestBrainValue = localStorage.getItem('useBestBrain');
+if (useBestBrainValue === null || useBestBrainValue === 'false') {
+    numberOfCars = 100;
+    useBestBrain = false;
+} else if (useBestBrainValue === 'true') {
+    numberOfCars = 1;
+    useBestBrain = true;
+}
+
 const bestBrain =
   '{"levels":[{"inputs":[0.3645124874763708,0,0,0,0.3546634807078054],"outputs":[0,1,1,1,0,1],"biases":[0.03451589855755649,-0.20484656413485156,0.03630905869324829,-0.09722316897472935,-0.0166381044568817,-0.06842078980774374],"weights":[[-0.09149494405164146,0.25526543739504204,0.03692528668619509,-0.12260999082956635,-0.24231122304068745,-0.09980400393209822],[-0.043916316282084186,-0.09613770816433817,0.05396997129020988,-0.047598470569437654,-0.19803902651065206,-0.2516192791205397],[0.14844381887587055,-0.10566415706744882,-0.20272076413169868,0.17988595625402198,-0.09344995546891387,0.13017567034708083],[0.25543289230400346,-0.2455387220540493,-0.2425259513893161,0.02604515909738872,0.12524109196197566,0.3076416330990159],[0.04886489390921537,-0.015944931683503763,0.20481849027255172,0.24250260413008135,-0.1763081944280927,0.09007775265475443]]},{"inputs":[0,1,1,1,0,1],"outputs":[1,1,1,0],"biases":[-0.1916651894291694,-0.13685019904061324,0.10234484694400227,0.02992567248931423],"weights":[[-0.027586726396734915,0.01623925534337306,-0.06939703864282984,0.33324622588443303],[-0.21306257603590667,0.08049706910004184,0.03123602946879392,-0.008233381965737462],[0.0660369787032861,-0.2556852240816098,0.5131275790607983,-0.057560011526841315],[0.010531252634012223,-0.19221641676786994,-0.13163808298408622,-0.2250680175439016],[-0.09132738555730066,-0.21428702542836248,-0.34215763545430994,-0.0339899172230486],[-0.00488407465869177,0.2332067756934954,-0.011448192177650487,-0.09682256797869643]]}]}';
-
 const myRoad = new road(carCanvas.width/2,carCanvas.width);
-const allCars = generateCars(1);
+const allCars = generateCars(numberOfCars);
 let bestCar = allCars[0];
-// if(localStorage.getItem('bestBrain')){
-//     for(let i=0;i<allCars.length;i++){
-//         allCars[i].brain = JSON.parse(localStorage.getItem('bestBrain'));
-//         if(i!=0){
-//             NeuralNetwork.mutate(allCars[i].brain,0.1);
-//         }
-//     }
-// }
-if(bestBrain){
+if(!useBestBrain && localStorage.getItem('bestBrain')){
+    for(let i=0;i<allCars.length;i++){
+        allCars[i].brain = JSON.parse(localStorage.getItem('bestBrain'));
+        if(i!=0){
+            NeuralNetwork.mutate(allCars[i].brain,0.1);
+        }
+    }
+}
+if(useBestBrain){
     for(let i=0;i<allCars.length;i++){
         allCars[i].brain = JSON.parse(bestBrain);
         if(i!=0){
